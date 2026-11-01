@@ -14,7 +14,8 @@ export default function HeroSection({ profile }) {
   const [liveProfile, setLiveProfile] = useState(profile);
 
   useEffect(() => {
-    // Sync latest profile from MongoDB
+    // Only fetch if profile was not provided by server
+    if (profile) return;
     fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/profile`)
       .then((r) => r.json())
       .then((res) => {
@@ -119,62 +120,40 @@ export default function HeroSection({ profile }) {
     }
   };
 
-  // Coordinated entrance animations triggered only when preloader completes
+  // Clean entrance variants with instant opacity for high Lighthouse/PageSpeed scores
   const containerVariants = {
-    hidden: { opacity: 0 },
+    hidden: { opacity: 1 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.12,
-        delayChildren: 0.05,
+        staggerChildren: 0.06,
       },
     },
   };
 
   const fadeFromLeft = {
-    hidden: { opacity: 0, x: -35 },
-    visible: {
-      opacity: 1,
-      x: 0,
-      transition: { duration: 0.75, ease: [0.22, 1, 0.36, 1] },
-    },
+    hidden: { opacity: 1, x: 0 },
+    visible: { opacity: 1, x: 0 },
   };
 
   const fadeFromRight = {
-    hidden: { opacity: 0, x: 35 },
-    visible: {
-      opacity: 1,
-      x: 0,
-      transition: { duration: 0.75, ease: [0.22, 1, 0.36, 1] },
-    },
+    hidden: { opacity: 1, x: 0 },
+    visible: { opacity: 1, x: 0 },
   };
 
   const fadeFromTop = {
-    hidden: { opacity: 0, y: -25 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.75, ease: [0.22, 1, 0.36, 1] },
-    },
+    hidden: { opacity: 1, y: 0 },
+    visible: { opacity: 1, y: 0 },
   };
 
   const fadeFromBottom = {
-    hidden: { opacity: 0, y: 25 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.75, ease: [0.22, 1, 0.36, 1] },
-    },
+    hidden: { opacity: 1, y: 0 },
+    visible: { opacity: 1, y: 0 },
   };
 
   const photoScaleVariant = {
-    hidden: { opacity: 0, scale: 0.9, y: 20 },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      y: 0,
-      transition: { duration: 0.9, ease: [0.16, 1, 0.3, 1] },
-    },
+    hidden: { opacity: 1, scale: 1 },
+    visible: { opacity: 1, scale: 1 },
   };
 
   return (
@@ -183,20 +162,11 @@ export default function HeroSection({ profile }) {
       className="relative min-h-[92vh] flex flex-col justify-between pt-28 sm:pt-32 pb-8 overflow-hidden"
     >
       {/* Ambient warm radial glow backdrop centered behind Jifan */}
-      <motion.div
-        initial="hidden"
-        animate={isLoaded ? "visible" : "hidden"}
-        variants={{
-          hidden: { opacity: 0, scale: 0.8 },
-          visible: { opacity: 0.85, scale: 1, transition: { duration: 1.2, ease: "easeOut" } },
-        }}
-        className="absolute top-[48%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] sm:w-[650px] sm:h-[650px] rounded-full amber-glow pointer-events-none -z-10 blur-3xl"
+      <div
+        className="absolute top-[48%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] sm:w-[650px] sm:h-[650px] rounded-full amber-glow pointer-events-none -z-10 blur-3xl opacity-85"
       />
 
-      <motion.div
-        initial="hidden"
-        animate={isLoaded ? "visible" : "hidden"}
-        variants={containerVariants}
+      <div
         className="max-w-7xl mx-auto px-6 sm:px-8 w-full flex-1 flex flex-col justify-between"
       >
         {/* Top Header Row */}
@@ -257,6 +227,7 @@ export default function HeroSection({ profile }) {
               alt={name}
               fill
               priority
+              fetchPriority="high"
               unoptimized={Boolean(photoUrl?.startsWith("data:"))}
               sizes="(max-width: 768px) 100vw, 380px"
               className="object-contain object-bottom drop-shadow-[0_25px_35px_rgba(0,0,0,0.7)]"
@@ -313,7 +284,7 @@ export default function HeroSection({ profile }) {
             <span>{downloading ? "Downloading..." : "Download Resume"}</span>
           </button>
         </motion.div>
-      </motion.div>
+      </div>
     </section>
   );
 }

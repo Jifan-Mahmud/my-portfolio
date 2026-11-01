@@ -58,20 +58,28 @@ export default function CertificatesSection({ certificates }) {
 
   const items = certificates && certificates.length > 0 ? certificates : defaultCertificates;
 
-  // If any certificate has a PDF but missing image, attempt to render first page client-side
+  // Defer heavy PDF rendering until browser has finished critical initial rendering
   useEffect(() => {
-    items.forEach(async (item) => {
-      if (!item.image && item.pdfUrl && !dynamicThumbnails[item._id]) {
-        try {
-          const generatedImg = await renderPdfFirstPageToImage(item.pdfUrl, 800);
-          if (generatedImg) {
-            setDynamicThumbnails((prev) => ({ ...prev, [item._id]: generatedImg }));
+    if (typeof window === "undefined") return;
+    const idleFn = window.requestIdleCallback || ((cb) => setTimeout(cb, 3000));
+    const handle = idleFn(() => {
+      items.forEach(async (item) => {
+        if (!item.image && item.pdfUrl && !dynamicThumbnails[item._id]) {
+          try {
+            const generatedImg = await renderPdfFirstPageToImage(item.pdfUrl, 800);
+            if (generatedImg) {
+              setDynamicThumbnails((prev) => ({ ...prev, [item._id]: generatedImg }));
+            }
+          } catch (e) {
+            console.debug("Could not render client-side PDF thumbnail:", e);
           }
-        } catch (e) {
-          console.debug("Could not render client-side PDF thumbnail:", e);
         }
-      }
+      });
     });
+
+    return () => {
+      if (window.cancelIdleCallback) window.cancelIdleCallback(handle);
+    };
   }, [items, dynamicThumbnails]);
 
   // Keyboard accessibility: Escape key to close modal

@@ -13,14 +13,21 @@ async function getPortfolioData() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
   try {
+    const fetchWithTimeout = (url, options = {}, timeoutMs = 3500) => {
+      return fetch(url, {
+        ...options,
+        signal: AbortSignal.timeout(timeoutMs),
+      });
+    };
+
     const [profileRes, projectsRes, skillsRes, expRes, servicesRes, certsRes] =
       await Promise.allSettled([
-        fetch(`${apiUrl}/profile`, { next: { revalidate: 60 } }),
-        fetch(`${apiUrl}/projects`, { next: { revalidate: 60 } }),
-        fetch(`${apiUrl}/skills`, { next: { revalidate: 60 } }),
-        fetch(`${apiUrl}/experiences`, { next: { revalidate: 60 } }),
-        fetch(`${apiUrl}/services`, { next: { revalidate: 60 } }),
-        fetch(`${apiUrl}/certificates`, { next: { revalidate: 60 } }),
+        fetchWithTimeout(`${apiUrl}/profile`, { next: { revalidate: 60 } }),
+        fetchWithTimeout(`${apiUrl}/projects`, { next: { revalidate: 60 } }),
+        fetchWithTimeout(`${apiUrl}/skills`, { next: { revalidate: 60 } }),
+        fetchWithTimeout(`${apiUrl}/experiences`, { next: { revalidate: 60 } }),
+        fetchWithTimeout(`${apiUrl}/services`, { next: { revalidate: 60 } }),
+        fetchWithTimeout(`${apiUrl}/certificates`, { next: { revalidate: 60 } }),
       ]);
 
     const profile =

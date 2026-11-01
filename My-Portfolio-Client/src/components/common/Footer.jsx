@@ -8,7 +8,8 @@ export default function Footer({ profile }) {
   const [liveProfile, setLiveProfile] = useState(profile);
 
   useEffect(() => {
-    // Keep footer social links in sync with MongoDB live data
+    // Only fetch if profile was not provided by server
+    if (profile) return;
     fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/profile`)
       .then((r) => r.json())
       .then((res) => {

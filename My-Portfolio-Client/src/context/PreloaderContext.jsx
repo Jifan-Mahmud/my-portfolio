@@ -1,23 +1,14 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState } from "react";
 
 const PreloaderContext = createContext({
-  isLoaded: false,
+  isLoaded: true,
   setIsLoaded: () => {},
 });
 
 export function PreloaderProvider({ children }) {
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    // Failsafe timer: ensures content becomes visible even in edge cases
-    const timer = setTimeout(() => {
-      setIsLoaded((prev) => (prev ? prev : true));
-    }, 3500);
-
-    return () => clearTimeout(timer);
-  }, []);
+  const [isLoaded, setIsLoaded] = useState(true);
 
   return (
     <PreloaderContext.Provider value={{ isLoaded, setIsLoaded }}>
